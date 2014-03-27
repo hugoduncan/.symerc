@@ -10,8 +10,8 @@ cp .tmux.conf ~
 cp .emacs ~
 
 mkdir -p ~/.emacs.d
-cp Cask ~/.emacs.d
+cp Cask ~
 
 curl -fsSkL https://raw.github.com/cask/cask/master/go | python
 cd ~
-cask install
+~/.cask/bin/cask install
