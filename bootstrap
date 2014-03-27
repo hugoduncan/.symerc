@@ -1,0 +1,17 @@
+#!/bin/bash
+
+apt-get install -y curl emacs24-nox mosh tree unzip zip
+
+cd $(dirname $0)
+
+cp .gitconfig ~
+cp .profile ~
+cp .tmux.conf ~
+cp .emacs ~
+
+mkdir -p ~/.emacs.d
+cp Cask ~/.emacs.d
+
+curl -fsSkL https://raw.github.com/cask/cask/master/go | python
+cd ~
+cask install
