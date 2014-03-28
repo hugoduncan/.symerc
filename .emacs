@@ -18,7 +18,7 @@
 (when (<= (display-color-cells) 8)
   (defun hl-line-mode () (interactive)))
 
-(global-set-key (kbd "C-c C-j") 'nrepl-jack-in)
+(global-set-key (kbd "C-c C-j") 'cider-jack-in)
 
 (global-set-key (kbd "C-c f") 'find-file-in-project)
 
@@ -76,11 +76,59 @@
 (add-hook 'prog-mode-hook 'idle-highlight-mode)
 (add-hook 'prog-mode-hook 'hl-line-mode)
 
-(add-hook 'clojure-mode-hook 'paredit-mode)
+;;; Clojure
+(add-to-list 'auto-mode-alist  '("\\.clj$" . clojure-mode))
+(add-to-list 'auto-mode-alist  '("\\.cljs$" . clojure-mode))
+(add-to-list 'auto-mode-alist  '("\\.cljx$" . clojure-mode))
+(add-to-list 'auto-mode-alist  '("\\.edn$" . clojure-mode))
 
-(add-hook 'nrepl-connected-hook
-          (defun pnh-clojure-mode-eldoc-hook ()
-            (add-hook 'clojure-mode-hook 'turn-on-eldoc-mode)))
+(add-hook 'clojure-mode-hook 'smartparens-strict-mode)
+(add-hook 'clojure-mode-hook 'sp-use-paredit-bindings)
+(add-hook 'clojure-mode-hook
+          (defun hd-setup-sp ()
+            ;; (setq fill-paragraph-function 'sp-indent-defun)
+            (define-key clojure-mode-map (kbd "M-q") 'sp-indent-defun)
+            (setq sp-autoinsert-if-followed-by-word t)
+            (setq fill-paragraph-function 'lisp-fill-paragraph)
+            (sp-pair "``" nil :actions :rem)
+            (sp-pair "'" nil :actions :rem)))
+;; (add-hook 'clojure-mode-hook 'paredit-mode)
+(add-hook 'clojure-test-mode-hook
+          (defun hd-add-ediff-cleanup ()
+            (add-hook 'ediff-cleanup-hook 'clojure-test-ediff-cleanup)))
+
+(add-hook 'cider-repl-mode-hook
+          (defun my-cider-repl-mode-hook ()
+            (setq cider-popup-stacktraces t)
+            (setq cider-repl-popup-stacktraces t)
+            (setq cider-auto-select-error-buffer t)
+            (setq cider-repl-history-file "~/.cider-history")
+            (define-key cider-repl-mode-map
+              (kbd "M-r") 'cider-repl-previous-matching-input)
+            (define-key cider-repl-mode-map
+              (kbd "M-s") 'cider-repl-next-matching-input)))
+(add-hook 'cider-repl-mode-hook 'cider-turn-on-eldoc-mode)
+(add-hook 'cider-repl-mode-hook 'smartparens-strict-mode)
+(add-hook 'cider-repl-mode-hook 'subword-mode)
+
+(defun hd-switch-repl (arg)
+  (interactive "P")
+  (when arg
+    (cider-repl-set-ns (cider-current-ns)))
+  (cider-switch-to-repl-buffer))
+
+(add-hook 'cider-mode-hook
+          (defun my-cider-mode-hook ()
+            (setq cider-auto-select-error-buffer t)
+            (setq cider-switch-to-repl-command
+                  'cider-switch-to-current-repl-buffer)
+            (define-key cider-mode-map
+              (kbd "C-c C-z") 'hd-switch-repl)
+            (setq cider-server-command
+                  "/Users/duncan/bin/lein repl :headless")))
+(add-hook 'cider-mode-hook 'cider-turn-on-eldoc-mode)
+(add-hook 'cider-mode-hook 'subword-mode)
+
 
 (setq whitespace-style '(face trailing lines-tail tabs))
 
