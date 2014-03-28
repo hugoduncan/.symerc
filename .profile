@@ -14,3 +14,4 @@ if [ -d "$HOME/bin" ] ; then
 fi
 
 export EDITOR="emacsclient"
+export PATH="$HOME/.cask/bin:$PATH"
